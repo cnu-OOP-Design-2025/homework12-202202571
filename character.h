@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include "logger.h"
+
 using namespace std;
 
 
@@ -33,7 +34,10 @@ public:
 // 기본 캐릭터
 class Knight : public Character {
 public:
-    Knight() { description = "Knight"; type = CharacterType::Knight;
+    Knight() { 
+        auto logger = Logger::getInstance();
+        logger -> log("[Create] Knight");   
+        description = "Knight"; type = CharacterType::Knight;
     }
     int getAttack() const override { return 15; }
     int getSpeed() const override { return 8; }
@@ -42,7 +46,10 @@ public:
 
 class Wizard : public Character {
 public:
-    Wizard() { description = "Wizard"; type = CharacterType::Wizard;
+    Wizard() { 
+        auto logger = Logger::getInstance();
+        logger -> log("[Create] Wizard");
+        description = "Wizard"; type = CharacterType::Wizard;
     }
     int getAttack() const override { return 20; }
     int getSpeed() const override { return 10; }
@@ -51,7 +58,10 @@ public:
 
 class Archer : public Character {
 public:
-    Archer() { description = "Archer"; type = CharacterType::Archer;
+    Archer() { 
+        auto logger = Logger::getInstance();
+        logger -> log("[Create] Archer");
+        description = "Archer"; type = CharacterType::Archer;
     }
     int getAttack() const override { return 18; }
     int getSpeed() const override { return 15; }
@@ -64,6 +74,8 @@ protected:
     shared_ptr<Character> character;
 public:
     EquipDeco(shared_ptr<Character> c, string item) : character(c) {
+        auto logger = Logger::getInstance();
+        logger -> log("[Trying to Equip] "+c->getDescription()+" + "+item); 
     }
     virtual ~EquipDeco() { }
 };
@@ -91,7 +103,12 @@ public:
 
 class Staff : public EquipDeco {
 public:
-    Staff(shared_ptr<Character> c) : EquipDeco(c, "Staff") {}
+    Staff(shared_ptr<Character> c) : EquipDeco(c, "Staff") {
+        string str = c->getDescription();
+        if(str.find("Wizard") == string::npos){
+            throw std::invalid_argument("Staff requires Wizard");
+        }
+    }
     string getDescription() const override { return character->getDescription() + " + Staff"; }
     int getAttack() const override { return character->getAttack() + 8; }
     int getSpeed() const override { return character->getSpeed(); }
@@ -111,7 +128,12 @@ public:
 
 class Bow : public EquipDeco {
 public:
-    Bow(shared_ptr<Character> c) : EquipDeco(c, "Bow") {}
+    Bow(shared_ptr<Character> c) : EquipDeco(c, "Bow") {
+        string str = c-> getDescription();
+        if(str.find("Knight")== string::npos && str.find("Archer") ==string::npos){
+            throw std::invalid_argument("Bow requires Archer or Knight");
+        }
+    }
     string getDescription() const override { return character->getDescription() + " + Bow"; }
     int getAttack() const override { return character->getAttack() + 7; }
     int getSpeed() const override { return character->getSpeed() + 2; }
